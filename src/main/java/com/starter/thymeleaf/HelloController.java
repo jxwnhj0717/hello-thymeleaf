@@ -9,10 +9,19 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class HelloController {
 
-    @GetMapping("hello")
-    public String hello(HttpServletRequest request) {
-        request.setAttribute("name", "huangjin");
-        return "hello";
+    @GetMapping("nav")
+    public String nav(HttpServletRequest request) {
+        return "nav";
+    }
+
+    @GetMapping("fenbao")
+    public String fenbao(HttpServletRequest request) {
+        return "fenbao";
+    }
+
+    @GetMapping("res")
+    public String res(HttpServletRequest request) {
+        return "res";
     }
 
 }

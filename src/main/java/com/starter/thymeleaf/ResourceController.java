@@ -54,8 +54,10 @@ public class ResourceController {
     @GetMapping("resJson2")
     @ResponseBody
     public List<Resource> resJson2(@RequestParam(required = false) String uid,
-                                @RequestParam(required = false) Integer offset,
-                                @RequestParam(required = false) Integer limit) {
+                                   @RequestParam(required = false) Integer offset,
+                                   @RequestParam(required = false) Integer limit,
+                                   @RequestParam(required = false) String sort,
+                                   @RequestParam(required = false) String order) {
         List<Resource> resources = resourceRepository.getResources(uid);
         List<Resource> subResources = null;
         if(!resources.isEmpty()) {
@@ -66,6 +68,9 @@ public class ResourceController {
         } else {
             subResources = resources;
         }
+
+
+
         return subResources;
     }
 

@@ -62,9 +62,6 @@ public class ResourceRepository {
         if(resources == null) {
             resources = Collections.emptyList();
         }
-        if(resources.size() > 1000) {
-            resources = resources.subList(0, 1000);
-        }
         return resources;
     }
 }

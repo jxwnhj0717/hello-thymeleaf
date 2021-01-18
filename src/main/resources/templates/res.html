@@ -30,6 +30,10 @@
             }, function(start, end, label) {
                 console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');
             });
+
+            $('button[name="download"]').click(function() {
+                window.open("resDownload", '_blank');
+            });
         });
     </script>
 
@@ -64,14 +68,14 @@
 
 <!-- 查询 -->
 <nav class="bd-subnavbar" aria-label="Secondary navigation">
-    <form class="px-3 pt-3">
+    <form class="px-3 pt-3" th:action="@{/res}">
         <div class="container me-0 pe-0">
             <div class="row">
                 <div class="col-l1">
                     <div class="pt-2">玩家id</div>
                 </div>
                 <div class="col-2">
-                    <input type="text" class="form-control" placeholder="玩家id" aria-label="玩家id">
+                    <input type="text" class="form-control" placeholder="玩家id" aria-label="玩家id" name="uid" th:value="${uid}">
                 </div>
                 <div class="col-l2">
                     <div class="pt-2">查询时段</div>
@@ -81,7 +85,7 @@
                 </div>
                 <div class="col">
                     <button type="submit" class="btn btn-primary mb-3">查询</button>
-                    <button type="submit" class="btn btn-primary mb-3">下载</button>
+                    <button type="button" class="btn btn-primary mb-3" name="download">下载</button>
                 </div>
             </div>
         </div>
@@ -105,27 +109,16 @@
     </tr>
     </thead>
     <tbody>
-    <tr>
-        <th scope="row">1</th>
-        <th>hj</th>
-        <td>1</td>
-        <td>/test/a.png</td>
-        <td>1k</td>
-        <td>2020-01-16 11:11:11</td>
-        <td>2020-01-16 11:11:12</td>
-        <td>1m</td>
-        <td>1</td>
-    </tr>
-    <tr>
-        <th scope="row">2</th>
-        <th>hj</th>
-        <td>1</td>
-        <td>/test/a2.png</td>
-        <td>2k</td>
-        <td>2020-01-16 11:11:11</td>
-        <td>2020-01-16 11:11:13</td>
-        <td>2m</td>
-        <td>1</td>
+    <tr th:each="res : ${session.resources}">
+        <th th:text="${resStat.count}" scope="row">1</th>
+        <td th:text="${res.uid}">uid</td>
+        <td th:text="${res.lvl}">1</td>
+        <td th:text="${res.res}">/test/a.png</td>
+        <td th:text="${res.resSize}">1k</td>
+        <td th:text="${#dates.format(res.startTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01 00:00:00</td>
+        <td th:text="${#dates.format(res.endTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-02 00:00:00</td>
+        <td th:text="${res.dt}">1m</td>
+        <td th:text="${res.requestCount}">1</td>
     </tr>
     </tbody>
 </table>

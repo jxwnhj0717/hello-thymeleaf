@@ -1,15 +1,11 @@
 package com.starter.thymeleaf;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,7 +20,7 @@ public class ResourceRepository {
             Resource res = Resource.builder()
                     .id(UUID.randomUUID().toString())
                     .uid("hj")
-                    .lvl(ThreadLocalRandom.current().nextInt(10) + 1)
+                    .lvl(ThreadLocalRandom.current().nextInt(100) + 1)
                     .res("/res/" + UUID.randomUUID().toString() + ".png")
                     .resSize(1000)
                     .startTime(new Date(System.currentTimeMillis() - ThreadLocalRandom.current().nextInt(10000)))

@@ -1,84 +1,53 @@
-package com.starter.thymeleaf;
+package com.starter.thymeleaf.fenbao;
 
-import com.alibaba.excel.EasyExcel;
 import com.google.common.primitives.Ints;
+import com.starter.thymeleaf.res.Resource;
+import com.starter.thymeleaf.res.ResourceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
-public class ResourceController {
+public class FenBaoController {
 
     @Autowired
     private ResourceRepository resourceRepository;
-
-    @GetMapping("nav")
-    public String nav(HttpServletRequest request) {
-        return "nav";
-    }
-
-    @GetMapping("res")
-    public String res(HttpServletRequest request, @RequestParam(required = false) String uid) {
-        // List<Resource> resources = resourceRepository.getResources(uid);
-        request.setAttribute("uid", uid);
-        return "res";
-    }
-
-    @GetMapping("resJson")
-    @ResponseBody
-    public ResourcePage resJson(@RequestParam(required = false) String uid,
-                                @RequestParam(required = false) Integer offset,
-                                @RequestParam(required = false) Integer limit) {
-        List<Resource> resources = resourceRepository.getResources(uid);
-        List<Resource> subResources = null;
-        if(!resources.isEmpty()) {
-            int fromIndex = offset == null ? 0 : Math.min(offset, resources.size() - 1);
-            if(limit == null) limit = 1000;
-            int toIndex = Math.min(fromIndex + limit, resources.size());
-            subResources = resources.subList(fromIndex, toIndex);
-        } else {
-            subResources = resources;
-        }
-        ResourcePage page = new ResourcePage(resources.size(), subResources);
-        return page;
-    }
-
-
-    @GetMapping("resDownload")
-    public void resDownload(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("application/x-excel");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=res.xlsx");
-
-        List<Resource> resources = (List<Resource>) request.getSession().getAttribute("resources");
-
-        File file = File.createTempFile("res", "xlsx");
-        EasyExcel.write(file, Resource.class).sheet("data").doWrite(resources);
-
-        try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
-            StreamUtils.copy(in, out);
-        }
-
-
-    }
 
 
     @GetMapping("fenbao")
     public String fenbao(HttpServletRequest request,
                          @RequestParam(required = false) String uid,
-                         @RequestParam(required = false) String lvls) {
+                         @RequestParam(required = false) String lvls,
+                         @RequestParam(required = false) String daterange) throws ParseException {
+        // 01/19/2021 - 01/19/2021
+        Date startTime = null;
+        Date endTime = null;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+            if(StringUtils.hasText(daterange)) {
+                String[] split = daterange.split(" - ");
+                if(split.length > 0) {
+                    startTime = sdf.parse(split[0].trim());
+                }
+                if(split.length > 1) {
+                    endTime = sdf.parse(split[1].trim());
+                }
+            }
+        } catch (Exception e) {
+            log.info("", e);
+        }
 
-        List<Resource> resources = resourceRepository.getResources(uid);
+        List<Resource> resources = resourceRepository.getResources(uid, startTime, endTime);
 
         // 按路径分类统计
         Map<Integer, Map<String, Integer>> fenbao = new TreeMap<>();
@@ -91,7 +60,7 @@ public class ResourceController {
 
         // 分包等级
         List<LevelFragmemt> lfs = new ArrayList<>();
-        if(lvls != null) {
+        if(StringUtils.hasText(lvls)) {
             String[] lvlArr = lvls.split(",");
             for (String lvlStr : lvlArr) {
                 Integer lvl = 0;
@@ -124,10 +93,14 @@ public class ResourceController {
             for (Map.Entry<String, Integer> lvlEntry : entry.getValue().entrySet()) {
                 lc.getPathCountMap().compute(lvlEntry.getKey(), (k, v) -> v == null ? lvlEntry.getValue() : v + lvlEntry.getValue());
             }
-            Iterator<Map.Entry<String, Integer>> iterator = lc.getPathCountMap().entrySet().iterator();
+        }
+
+        // 过滤数量不满足的
+        for (LevelFragmemt lf : lfs) {
+            Iterator<Map.Entry<String, Integer>> iterator = lf.getPathCountMap().entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<String, Integer> next = iterator.next();
-                if(next.getValue() < lc.getMinPathCount()) {
+                if(next.getValue() < lf.getMinPathCount()) {
                     iterator.remove();
                 }
             }
@@ -151,6 +124,10 @@ public class ResourceController {
             }
         }
         FenBaoTable fenBaoTable = new FenBaoTable(lvlHeaderArr, content);
+
+        request.setAttribute("uid", uid);
+        request.setAttribute("lvls", lvls);
+        request.setAttribute("daterange", daterange);
         request.setAttribute("fenBaoTable", fenBaoTable);
 
         return "fenbao";

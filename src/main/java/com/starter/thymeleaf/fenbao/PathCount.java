@@ -1,4 +1,4 @@
-package com.starter.thymeleaf;
+package com.starter.thymeleaf.fenbao;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

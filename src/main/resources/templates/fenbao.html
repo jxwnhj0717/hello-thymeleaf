@@ -34,7 +34,7 @@
 </head>
 <body>
 <!-- 导航栏 -->
-<nav th:insert="nav :: nav">
+<nav th:insert="nav :: nav('fenbao')">
 
 </nav>
 
@@ -51,19 +51,19 @@
                     <div class="pt-2">玩家id</div>
                 </div>
                 <div class="col-1">
-                    <input type="text" class="form-control" placeholder="玩家id" aria-label="玩家id" name="uid">
+                    <input type="text" class="form-control" placeholder="玩家id" name="uid" th:value="${uid}" />
                 </div>
                 <div class="col-l2">
                     <div class="pt-2">分包等级</div>
                 </div>
                 <div class="col-2">
-                    <input type="text" class="form-control" placeholder="lvl1,lvl2,lvl3" aria-label="分包等级" name="lvls">
+                    <input type="text" class="form-control" placeholder="lvl1,lvl2,lvl3" name="lvls" th:value="${lvls}" />
                 </div>
                 <div class="col-l2">
                     <div class="pt-2">查询时段</div>
                 </div>
                 <div class="col-2">
-                    <input type="text" class="form-control" name="daterange" />
+                    <input type="text" class="form-control" name="daterange" th:value="${daterange}" />
                 </div>
                 <div class="col">
                     <button type="submit" class="btn btn-primary mb-3">查询</button>
@@ -102,8 +102,9 @@
     $(function() {
         $('input[name="daterange"]').daterangepicker({
             "alwaysShowCalendars": true,
-            "startDate": moment(),
-            "endDate": moment(),
+            "locale": {
+                format: 'YYYY/MM/DD'
+            }
         }, function(start, end, label) {
             console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');
         });

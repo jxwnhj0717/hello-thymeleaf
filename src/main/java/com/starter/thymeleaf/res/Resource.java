@@ -1,4 +1,4 @@
-package com.starter.thymeleaf;
+package com.starter.thymeleaf.res;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
